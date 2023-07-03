@@ -18,5 +18,8 @@ public interface IFollowService extends IService<Follow> {
 
     Result checkIsFollow(Long id);
 
-    Result getCommonFollow(Long id);
+    Result getCommonFollow(Long id,Integer f_current);
+
+    Result checkAllFollow(Integer current);
+
 }

@@ -25,7 +25,9 @@ public class InterceptorConfig implements WebMvcConfigurer {
                 "/upload/**",
                 "/blog/hot",
                 "/user/code",
-                "/user/login"
+                "/user/login",
+                "/user/loginByPwd",
+                "/encrypt/getSalt/"
         ).order(1);
         registry.addInterceptor(new RefreshTokenInterceptor(redisTemplate)).addPathPatterns("/**").order(0);
     }

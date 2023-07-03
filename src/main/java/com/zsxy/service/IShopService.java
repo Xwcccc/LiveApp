@@ -1,6 +1,7 @@
 package com.zsxy.service;
 
 import com.zsxy.dto.Result;
+import com.zsxy.entity.BlogComments;
 import com.zsxy.entity.Shop;
 import com.baomidou.mybatisplus.extension.service.IService;
 
@@ -9,8 +10,8 @@ import com.baomidou.mybatisplus.extension.service.IService;
  *  服务类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author xwc
+ * @since 2023-6
  */
 public interface IShopService extends IService<Shop> {
 
@@ -19,5 +20,7 @@ public interface IShopService extends IService<Shop> {
 
     Result update(Shop shop);
 
-    Result queryShopByType(Integer typeId, Integer current, Double x, Double y);
+    Result queryShopByType(Integer typeId, Integer current);
+
+    Result addXY(Double lot, Double lat);
 }

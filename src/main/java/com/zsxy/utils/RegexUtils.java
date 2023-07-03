@@ -3,7 +3,7 @@ package com.zsxy.utils;
 import cn.hutool.core.util.StrUtil;
 
 /**
- * @author 虎哥
+ * @author xwc
  */
 public class RegexUtils {
     /**
@@ -14,15 +14,6 @@ public class RegexUtils {
     public static boolean isPhoneInvalid(String phone){
         return mismatch(phone, RegexPatterns.PHONE_REGEX);
     }
-    /**
-     * 是否是无效邮箱格式
-     * @param email 要校验的邮箱
-     * @return true:符合，false：不符合
-     */
-    public static boolean isEmailInvalid(String email){
-        return mismatch(email, RegexPatterns.EMAIL_REGEX);
-    }
-
     /**
      * 是否是无效验证码格式
      * @param code 要校验的验证码

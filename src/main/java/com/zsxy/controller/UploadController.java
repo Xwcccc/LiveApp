@@ -3,13 +3,18 @@ package com.zsxy.controller;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.util.StrUtil;
 import com.zsxy.dto.Result;
+import com.zsxy.service.impl.UserInfoServiceImpl;
+import com.zsxy.service.impl.UserServiceImpl;
 import com.zsxy.utils.SystemConstants;
+import com.zsxy.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.Resource;
 import java.io.File;
 import java.io.IOException;
+import java.util.Objects;
 import java.util.UUID;
 
 @Slf4j
@@ -17,6 +22,8 @@ import java.util.UUID;
 @RequestMapping("upload")
 public class UploadController {
 
+    @Resource
+    private UserServiceImpl userService;
     /**
      * 上传图片到本地
      * @param image

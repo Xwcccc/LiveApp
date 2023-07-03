@@ -3,7 +3,9 @@ package com.zsxy.controller;
 
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.zsxy.dto.Location;
 import com.zsxy.dto.Result;
+import com.zsxy.entity.BlogComments;
 import com.zsxy.entity.Shop;
 import com.zsxy.service.IShopService;
 import com.zsxy.utils.SystemConstants;
@@ -60,6 +62,10 @@ public class ShopController {
         return  shopService.update(shop);
     }
 
+    @GetMapping("/locate/{lot}/{lat}")
+    public Result setXY(@PathVariable("lot") Double lot,@PathVariable("lat")Double lat){
+        return shopService.addXY(lot,lat);
+    }
     /**
      * 根据商铺类型分页查询商铺信息
      * @param typeId 商铺类型
@@ -69,11 +75,9 @@ public class ShopController {
     @GetMapping("/of/type")
     public Result queryShopByType(
             @RequestParam("typeId") Integer typeId,
-            @RequestParam(value = "current", defaultValue = "1") Integer current,
-            @RequestParam(value = "x",required = false) Double x,
-            @RequestParam(value = "y",required = false) Double y
+            @RequestParam(value = "current", defaultValue = "1") Integer current
     ) {
-        return shopService.queryShopByType(typeId,current,x,y);
+        return shopService.queryShopByType(typeId,current);
     }
 
     /**

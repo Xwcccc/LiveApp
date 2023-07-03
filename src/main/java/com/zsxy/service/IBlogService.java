@@ -25,4 +25,6 @@ public interface IBlogService extends IService<Blog> {
     Result saveAndFeedBlog(Blog blog);
 
     Result queryBlogByFollow(Long max, Integer offset);
+
+    Result deleteById(Long blog_id);
 }

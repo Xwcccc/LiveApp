@@ -1,6 +1,7 @@
 package com.zsxy.service.impl;
 
 import cn.hutool.core.bean.BeanUtil;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.zsxy.dto.Result;
 import com.zsxy.entity.VoucherOrder;
 import com.zsxy.mapper.VoucherOrderMapper;
@@ -17,6 +18,7 @@ import org.springframework.data.redis.connection.stream.*;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -25,6 +27,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.*;
+
+import static com.zsxy.utils.SystemConstants.MAX_PAGE_SIZE;
 
 /**
  * <p>
@@ -65,10 +69,6 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         String queueName = "stream.order";
         @Override
         public void run() {
-           // while (!isBegin){
-             //   System.out.println("关闭！！！！！！！");
-           // }
-            System.out.println("开始啦！！！！！！！");
             while (true){
                 try {
                     //ID field value
@@ -178,10 +178,61 @@ public class VoucherOrderServiceImpl extends ServiceImpl<VoucherOrderMapper, Vou
         //返回订单ID
         return Result.ok(orderId);
     }
+
+    @Override
+    public Result killVoucherOrder(Long voucherId) {
+        Long userId = UserHolder.getUser().getId();
+        RLock rLock = redissonClient.getLock("order:normal:" + userId);
+        boolean lock = false;
+        try {
+            lock = rLock.tryLock(1, 10, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        if (!lock) {
+            return Result.fail("一次只允许下一单");
+        }
+        try{
+            IVoucherOrderService proxy = (IVoucherOrderService) AopContext.currentProxy();
+            return proxy.createNormalOrder(voucherId);
+        }finally {
+            rLock.unlock();
+        }
+    }
+
+    @Override
+    @Transactional
+    public Result createNormalOrder(Long voucherId){
+        Long userID = UserHolder.getUser().getId();
+        int count = query().eq("user_id", userID).eq("voucher_id", voucherId).count();
+        // 5.2.判断是否存在
+        if (count > 0) {
+            // 用户已经购买过了
+            return Result.fail("用户已经购买过一次！");
+        }
+        //添加订单信息
+        VoucherOrder voucherOrder = new VoucherOrder();
+        long orderId = redisIdWorker.nextID("Coupons");
+        voucherOrder.setId(orderId);
+        voucherOrder.setUserId(userID);
+        voucherOrder.setVoucherId(voucherId);
+        save(voucherOrder);
+        return Result.ok(orderId);
+    }
+
+    @Override
+    public Result checkAll(Integer current) {
+        Long user_id = UserHolder.getUser().getId();
+        Page<VoucherOrder> voucherOrderpage = query().eq("user_id",user_id).page(new Page<VoucherOrder>(current,MAX_PAGE_SIZE));
+        List<VoucherOrder> voucherOrderList = voucherOrderpage.getRecords();
+        return Result.ok(voucherOrderList);
+    }
 }
+
 /**
  *
  * 同步下单，串行执行，全程数据库查询更新
+ *
  @Override
  public Result seckillVoucherOrder(Long voucherId)  {
  //1.根据ID获得优惠券信息

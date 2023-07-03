@@ -4,14 +4,17 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.zsxy.dto.Result;
+import com.zsxy.entity.BlogComments;
 import com.zsxy.entity.Shop;
 import com.zsxy.mapper.ShopMapper;
 import com.zsxy.service.IShopService;
 import com.zsxy.utils.CacheClient;
 import com.zsxy.utils.SystemConstants;
+import com.zsxy.utils.UserHolder;
 import org.springframework.data.geo.Distance;
 import org.springframework.data.geo.GeoResult;
 import org.springframework.data.geo.GeoResults;
+import org.springframework.data.geo.Point;
 import org.springframework.data.redis.connection.RedisGeoCommands;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
@@ -48,14 +51,6 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         Shop shop = cacheClient
                 .queryWithPassThrough(CACHE_SHOP_KEY, id, Shop.class, this::getById, CACHE_SHOP_TTL, TimeUnit.MINUTES);
 
-        // 互斥锁解决缓存击穿
-        // Shop shop = cacheClient
-        //         .queryWithMutex(CACHE_SHOP_KEY, id, Shop.class, this::getById, CACHE_SHOP_TTL, TimeUnit.MINUTES);
-
-        // 逻辑过期解决缓存击穿
-        // Shop shop = cacheClient
-        //         .queryWithLogicalExpire(CACHE_SHOP_KEY, id, Shop.class, this::getById, 20L, TimeUnit.SECONDS);
-
         if (shop == null) {
             return Result.fail("店铺不存在！");
         }
@@ -78,9 +73,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
     }
 
     @Override
-    public Result queryShopByType(Integer typeId, Integer current, Double x, Double y) {
-        // 1.判断是否需要根据坐标查询
-        if (x == null || y == null) {
+    public Result queryShopByType(Integer typeId, Integer current) {
+        String locations = stringRedisTemplate.opsForValue().get("user:geo:"+UserHolder.getUser().getId());
+        if(locations == null){
             // 不需要坐标查询，按数据库查询
             Page<Shop> page = query()
                     .eq("type_id", typeId)
@@ -88,6 +83,9 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
             // 返回数据
             return Result.ok(page.getRecords());
         }
+        String[] location = locations.split(",");
+        Double x = Double.valueOf(location[0]);
+        Double y = Double.valueOf(location[1]);
 
         // 2.计算分页参数
         int from = (current - 1) * SystemConstants.DEFAULT_PAGE_SIZE;
@@ -95,11 +93,12 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
 
         // 3.查询redis、按照距离排序、分页。结果：shopId、distance
         String key = SHOP_GEO_KEY + typeId;
-        GeoResults<RedisGeoCommands.GeoLocation<String>> results = stringRedisTemplate.opsForGeo() // GEOSEARCH key BYLONLAT x y BYRADIUS 10 WITHDISTANCE
+        // GEOSEARCH key BYLONLAT x y BYRADIUS 10 WITHDISTANCE
+        GeoResults<RedisGeoCommands.GeoLocation<String>> results = stringRedisTemplate.opsForGeo()
                 .search(
                         key,
                         GeoReference.fromCoordinate(x, y),
-                        new Distance(5000),
+                        new Distance(8000),
                         RedisGeoCommands.GeoSearchCommandArgs.newGeoSearchArgs().includeDistance().limit(end)
                 );
         // 4.解析出id
@@ -130,5 +129,13 @@ public class ShopServiceImpl extends ServiceImpl<ShopMapper, Shop> implements IS
         }
         // 6.返回
         return Result.ok(shops);
+    }
+
+    @Override
+    public Result addXY(Double lot, Double lat) {
+        Long userId = UserHolder.getUser().getId();
+        String key = "user:geo:"+ userId;
+        stringRedisTemplate.opsForValue().set(key,lot+","+lat,20,TimeUnit.MINUTES);
+        return Result.ok();
     }
 }

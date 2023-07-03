@@ -10,8 +10,8 @@ import java.util.List;
  *  服务类
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author xwc
+ * @since 2023-6
  */
 public interface IShopTypeService extends IService<ShopType> {
 

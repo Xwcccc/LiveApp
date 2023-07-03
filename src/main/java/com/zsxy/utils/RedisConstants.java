@@ -1,6 +1,7 @@
 package com.zsxy.utils;
 
 public class RedisConstants {
+    public static final String LOGIN_SALT_KEY = "user:login:salt";
     public static final String LOGIN_CODE_KEY = "login:code:";
     public static final Long LOGIN_CODE_TTL = 1L;
     public static final String LOGIN_USER_KEY = "login:token:";
@@ -16,6 +17,8 @@ public class RedisConstants {
 
     public static final String SECKILL_STOCK_KEY = "seckill:stock:";
     public static final String BLOG_LIKED_KEY = "blog:like:";
+    public static final String Comment_LIKED_KEY = "comment:blog:like:";
+    public static final String Shop_Comment_LIKED_KEY = "comment:shop:like:";
     public static final String FEED_KEY = "feed:";
     public static final String FOLLOW_KEY = "follow:";
     public static final String SHOP_GEO_KEY = "shop:geo:";

@@ -22,8 +22,8 @@ import java.time.LocalDateTime;
 @Data
 @EqualsAndHashCode(callSuper = false)
 @Accessors(chain = true)
-@TableName("tb_shop")
-public class Shop implements Serializable {
+@TableName("tb_shop_comments")
+public class ShopComments implements Serializable {
 
     private static final long serialVersionUID = 1L;
 
@@ -34,64 +34,55 @@ public class Shop implements Serializable {
     private Long id;
 
     /**
-     * 商铺名称
+     * 用户图标
      */
+    @TableField(exist = false)
+    private String icon;
+    /**
+     * 用户姓名
+     */
+    @TableField(exist = false)
     private String name;
+    /**
+     * 是否点赞过了
+     */
+    @TableField(exist = false)
+    private Boolean isLike;
 
     /**
-     * 商铺类型的id
+     * 用户id
      */
-    private Long typeId;
+    private Long userId;
 
     /**
-     * 商铺图片，多个图片以','隔开
+     * 探店id
      */
-    private String images;
+    private Long shopId;
 
     /**
-     * 商圈，例如陆家嘴
+     * 关联的1级评论id，如果是一级评论，则值为0
      */
-    private String area;
+    private Long parentId;
 
     /**
-     * 地址
+     * 回复的评论id
      */
-    private String address;
+    private Long answerId;
 
     /**
-     * 经度
+     * 回复的内容
      */
-    private Double x;
+    private String content;
 
     /**
-     * 维度
+     * 点赞数
      */
-    private Double y;
+    private Integer liked;
 
     /**
-     * 均价，取整数
+     * 状态，0：正常，1：被举报，2：禁止查看
      */
-    private Long avgPrice;
-
-    /**
-     * 销量
-     */
-    private Integer sold;
-
-    /**
-     * 评论数量
-     */
-    private Integer comments;
-
-    /**
-     * 评分，1~5分，乘10保存，避免小数
-     */
-    private Integer score;
-
-    /**
-     * 营业时间，例如 10:00-22:00
-     */
-    private String openHours;
+    private Boolean status;
 
     /**
      * 创建时间
@@ -104,6 +95,4 @@ public class Shop implements Serializable {
     private LocalDateTime updateTime;
 
 
-    @TableField(exist = false)
-    private Double distance;
 }

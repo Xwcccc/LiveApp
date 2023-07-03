@@ -5,16 +5,21 @@ import cn.hutool.core.bean.BeanUtil;
 import com.zsxy.dto.LoginFormDTO;
 import com.zsxy.dto.Result;
 import com.zsxy.dto.UserDTO;
+import com.zsxy.entity.Blog;
 import com.zsxy.entity.User;
 import com.zsxy.entity.UserInfo;
 import com.zsxy.service.IUserInfoService;
 import com.zsxy.service.IUserService;
 import com.zsxy.utils.UserHolder;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpSession;
+import java.util.Date;
+
+import static com.zsxy.utils.RedisConstants.LOGIN_USER_KEY;
 
 /**
  * <p>
@@ -35,6 +40,10 @@ public class UserController {
     @Resource
     private IUserInfoService userInfoService;
 
+    @Resource
+    private StringRedisTemplate stringRedisTemplate;
+
+    private String token;
     /**
      * 发送手机验证码
      */
@@ -51,24 +60,40 @@ public class UserController {
     @PostMapping("/login")
     public Result login(@RequestBody LoginFormDTO loginForm, HttpSession session){
         // 实现登录功能
-        return userService.login(loginForm, session);
+        Result r = userService.login(loginForm, session);
+        token = (String) r.getData();
+        return r;
     }
 
+    /**
+     * 登录功能
+     * @param loginForm 登录参数，包含账号、密码
+     */
+    @PostMapping("/loginByPwd")
+    public Result login2(@RequestBody LoginFormDTO loginForm){
+        // 实现登录功能
+        Result r = userService.loginByPwd(loginForm);
+        token = (String) r.getData();
+        return r;
+    }
     /**
      * 登出功能
      * @return 无
      */
     @PostMapping("/logout")
     public Result logout(){
-        // TODO 实现登出功能
-        return Result.fail("功能未完成");
+        // 实现登出功能
+        stringRedisTemplate.delete(LOGIN_USER_KEY+token);
+        UserHolder.removeUser();
+        return Result.ok();
     }
 
     @GetMapping("/me")
     public Result me(){
-        // TODO 获取当前登录的用户并返回
-        UserDTO u = UserHolder.getUser();
-        return Result.ok(u);
+        // 获取当前登录的用户并返回
+        Long uId = UserHolder.getUser().getId();
+        UserDTO user = (UserDTO) queryUserById(uId).getData();
+        return Result.ok(user);
     }
 
     @GetMapping("/info/{id}")
@@ -81,6 +106,7 @@ public class UserController {
         }
         info.setCreateTime(null);
         info.setUpdateTime(null);
+        info.setPassword(null);
         // 返回
         return Result.ok(info);
     }
@@ -104,4 +130,15 @@ public class UserController {
     public Result signCount(){
         return userService.signCount();
     }
+
+    @PostMapping("/edit")
+    public Result updateUserInfo(@RequestBody UserInfo userInfo){
+        return userInfoService.updateUserInfo(userInfo);
+    }
+
+    @PostMapping("/setIcon")
+    public Result updateIcon(@RequestBody String icon){
+        return userService.setIcon(icon);
+    }
+
 }

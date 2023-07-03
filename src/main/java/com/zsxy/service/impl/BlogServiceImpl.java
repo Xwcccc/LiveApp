@@ -58,7 +58,7 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
     public Result queryHotBlog(Integer current) {
         Page<Blog> page = query()
                 .orderByDesc("liked")
-                .page(new Page<>(current, SystemConstants.MAX_PAGE_SIZE));
+                .page(new Page<>(current, 10));
         // 获取当前页数据
         List<Blog> records = page.getRecords();
         // 查询用户
@@ -117,7 +117,6 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
             return Result.ok(Collections.emptyList());
         }
         List<Long> list = set.stream().map(Long::valueOf).collect(Collectors.toList());
-        System.out.println(list);
         String idStr = StrUtil.join(",", list);
         // 3.根据用户id查询用户 WHERE id IN ( 5 , 1 ) ORDER BY FIELD(id, 5, 1)
         List<UserDTO> userDTOS = userService.query()
@@ -181,4 +180,11 @@ public class BlogServiceImpl extends ServiceImpl<BlogMapper, Blog> implements IB
         followResult.setOffset(count);
         return Result.ok(followResult);
     }
+
+    @Override
+    public Result deleteById(Long blog_id) {
+        boolean isSuccess = removeById(blog_id);
+        return Result.ok(isSuccess);
+    }
+
 }

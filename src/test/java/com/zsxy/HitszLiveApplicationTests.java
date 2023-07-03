@@ -70,4 +70,5 @@ class HitszLiveApplicationTests {
              stringRedisTemplate.opsForGeo().add(key,locationList);
          }
      }
+
 }

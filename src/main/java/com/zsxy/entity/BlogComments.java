@@ -1,6 +1,7 @@
 package com.zsxy.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.TableField;
 import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableName;
 import lombok.Data;
@@ -15,8 +16,8 @@ import java.time.LocalDateTime;
  *
  * </p>
  *
- * @author 虎哥
- * @since 2021-12-22
+ * @author xwc
+ * @since 2023-6
  */
 @Data
 @EqualsAndHashCode(callSuper = false)
@@ -77,5 +78,20 @@ public class BlogComments implements Serializable {
      */
     private LocalDateTime updateTime;
 
+    /**
+     * 用户图标
+     */
+    @TableField(exist = false)
+    private String icon;
+    /**
+     * 用户姓名
+     */
+    @TableField(exist = false)
+    private String name;
+    /**
+     * 是否点赞过了
+     */
+    @TableField(exist = false)
+    private Boolean isLike;
 
 }

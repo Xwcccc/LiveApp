@@ -4,10 +4,7 @@ package com.zsxy.controller;
 import com.zsxy.dto.Result;
 import com.zsxy.service.impl.VoucherOrderServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 /**
  * <p>
@@ -26,5 +23,15 @@ public class VoucherOrderController {
     @PostMapping("seckill/{id}")
     public Result seckillVoucher(@PathVariable("id") Long voucherId) {
         return voucherOrderService.seckillVoucherOrder(voucherId);
+    }
+
+    @PostMapping("kill/{id}")
+    public Result killVoucher(@PathVariable("id") Long voucherId) {
+        return voucherOrderService.killVoucherOrder(voucherId);
+    }
+
+    @GetMapping("/check-orders")
+    public Result checkVoucherOrder(@RequestParam(value = "current",defaultValue = "1")Integer current){
+        return voucherOrderService.checkAll(current);
     }
 }

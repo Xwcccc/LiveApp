@@ -54,4 +54,10 @@ public class VoucherController {
     public Result queryVoucherOfShop(@PathVariable("shopId") Long shopId) {
        return voucherService.queryVoucherOfShop(shopId);
     }
+
+    @GetMapping("/checkVoucher/{id}")
+    public Result queryById(@PathVariable("id") Long id){
+        Voucher voucher = voucherService.query().eq("id",id).getEntity();
+        return Result.ok(voucher);
+    }
 }

@@ -25,4 +25,7 @@ public interface IUserService extends IService<User> {
 
     Result signCount();
 
+    Result setIcon(String icon);
+
+    Result loginByPwd(LoginFormDTO loginForm);
 }
